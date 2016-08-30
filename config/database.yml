@@ -78,8 +78,15 @@ test:
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
+
 production:
   <<: *default
-  database: Movimientos_production
-  username: Movimientos
-  password: <%= ENV['MOVIMIENTOS_DATABASE_PASSWORD'] %>
+  host: ec2-54-243-249-176.compute-1.amazonaws.com
+  database: d6gobmk7kdafq4
+  username: kwcgyyyprnowcz
+  password: 7B8YNIYczFyC2P-yK9nUexx0VN
+# production:
+#   <<: *default
+#   database: Movimientos_production
+#   username: Movimientos
+#   password: <%= ENV['MOVIMIENTOS_DATABASE_PASSWORD'] %>
