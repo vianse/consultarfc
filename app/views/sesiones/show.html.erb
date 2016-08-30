@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Id user:</strong>
+  <%= @sesione.id_user %>
+</p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @sesione.name %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @sesione.user_id %>
+</p>
+
+<%= link_to 'Edit', edit_sesione_path(@sesione) %> |
+<%= link_to 'Back', sesiones_path %>

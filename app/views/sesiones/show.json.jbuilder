@@ -1,0 +1,1 @@
+json.partial! "sesiones/sesione", sesione: @sesione

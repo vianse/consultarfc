@@ -1,0 +1,335 @@
+<div id="header" class="header navbar navbar-default navbar-fixed-top">
+			<!-- begin container-fluid -->
+			<div class="container-fluid">
+				<!-- begin mobile sidebar expand / collapse button -->
+				<div class="navbar-header">
+					<a href="index.html" class="navbar-brand">Consulta RFC</a>
+					<button type="button" class="navbar-toggle" data-click="sidebar-toggled">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+				</div>
+				<!-- end mobile sidebar expand / collapse button -->
+				
+				<!-- begin navbar-right -->
+				<% if user_signed_in? %>
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+					</li>
+					<li class="dropdown navbar-user">
+						<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+							<span class="hidden-xs"><%= current_user.email %></span> <b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu pull-right">
+							<li><%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'navbar-link'  %></li>
+						</ul>
+					</li>
+					<li>
+						<a href="javascript:;" data-click="right-sidebar-toggled">
+							<i class="fa fa-align-left"></i>
+						</a>
+					</li>
+					<% else %>
+
+					<li>
+						<%= link_to "Sign up", new_user_registration_path, :class => 'navbar-link'  %> |
+				  		<%= link_to "Login", new_user_session_path, :class => 'navbar-link'  %>
+					</li>
+				</ul>
+				<% end %>
+				<!-- end navbar-right -->
+			</div>
+			<!-- end container-fluid -->
+</div>
+<head>
+    <meta charset="utf-8" />
+    <title>Pronostic</title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="" name="Uso de Paybook" />
+    <meta content="" name="Juan Carlos Santiago" />
+    <!-- ================== BEGIN BASE CSS STYLE ================== -->
+    <link href="http://fonts.googleapis.com/css?family=Nunito:400,300,700" rel="stylesheet" id="fontFamilySrc" />
+    <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447734615/jquery-ui.min.css" rel="stylesheet" />
+    <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447734729/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447735152/animate.min.css" rel="stylesheet" />
+    <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447735249/style.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1457991292/animated.css">
+    <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447735472/jquery.gritter.css" rel="stylesheet" />  
+</head>
+<style>
+	.section-container {
+		padding-top: 3%!important;
+		padding-left: 10%!important;
+		padding-right: 10%!important;
+	}
+</style>
+<body data-no-turbolink data-no-transition-cache>
+<div class="section-container section-with-top-border p-b-5">
+                <div class="row">               
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-heading">
+                         
+                                <h4 class="panel-title"></h4>
+                            </div>
+                            <div class="table-responsive">
+							<div id="sesiones"></div>
+							 </div>
+                        </div>
+                      
+                    </div>
+                  
+                </div>
+</div>
+<script src="http://momentjs.com/downloads/moment-with-locales.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+<script src="https://rawgit.com/arqex/react-json/master/build/Json.js"></script>
+<script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js"></script>
+<!-- ================== BEGIN BASE JS ================== -->
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732895/jquery-1.9.1.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733033/jquery-migrate-1.1.0.min.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733159/jquery-ui.min.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733251/bootstrap.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="assets/crossbrowserjs/html5shiv.js"></script>
+    <script src="assets/crossbrowserjs/respond.min.js"></script>
+  <![endif]-->
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733386/jquery.slimscroll.min.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733489/jquery.cookie.js"></script>
+  <!-- ================== END BASE JS ================== -->
+  
+  <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733913/bootstrap_calendar.min.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733996/jquery.sparkline.min.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447734296/jquery.gritter.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447734361/page-index.demo.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733809/demo.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732638/apps.js"></script>
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1457673570/modernizr.js"></script>
+
+<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1457673570/jquery.mobile.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.12.3.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+<script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+<script src="//cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+
+</body>
+</html>
+<script type="text/jsx">
+
+var Paybook = React.createClass({
+ 	getInitialState: function () {
+    	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", loading: false, errors: {}, data1: [],data:"", data4:[], rfc: "", ciec: "", token: "", id_site: "56cf5728784806f72b8b456f"}
+  	},
+
+ 	componentDidMount: function() {
+ 		var url = 'https://sync.paybook.com/v1/sessions?api_key=' + this.state.api_key
+		$.ajax({
+      			url: url ,
+      			type: 'POST',
+				data: {
+				        api_key: this.state.api_key,
+				    	id_user: this.state.id_user
+	 				  },
+				success: function (returnval) {
+        			  this.setState({data: returnval.response.token});
+        			  this.consulta(this.state.data);
+        		}.bind(this)
+   		 });
+	 },
+	consulta: function(token){
+		var url1 = "https://sync.paybook.com/v1/catalogues/sites?token=" + token + "&id_site=" + this.state.id_site
+	 	$.ajax({
+			url: url1,
+			dataType: 'json',
+			success: function(sites) {
+				this.setState({data1: sites.response});
+				this.setState({token: token});
+					}.bind(this)
+				});
+	 },
+	onChangeRfc: function(e,f){
+		this.setState({rfc: e.target.value});
+	},
+	onChangeCiec: function(e){	
+		this.setState({ciec: e.target.value});
+	},
+	search: function(){
+		this.credenciales(this.state.token, this.state.data1[0].id_site);
+	},
+	credenciales: function(token, id_site){
+		$.ajax({
+      			url: 'https://sync.paybook.com/v1/credentials',
+      			type: 'POST',
+				data: {
+				    	id_site: id_site, 
+				    	credentials: {"rfc": this.state.rfc, "password": this.state.ciec},
+				    	token: token
+	 				  },
+				success: function (regreso) {
+        			  this.setState({data2: regreso.response});
+        			  this.estatus(this.state.data2.id_credential,token);
+        			  this.listado(this.state.data2.id_credential,token);
+        		}.bind(this)
+   		 });
+	},
+	estatus: function(credential, token){
+	 	$.ajax({
+			url: "https://sync.paybook.com/v1/credentials/" + credential + "/status?token=" + token,
+			dataType: 'json',
+			success: function(estatus) {
+				this.setState({data3: estatus.code});
+					}.bind(this)
+				});
+	 },
+	listado: function(credential, token){
+		var date = new Date();
+		var primerDia = new Date(date.getFullYear(), date.getMonth(), 1);
+		var ultimoDia = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+ 		var primeroUnix = Math.round(primerDia.getTime()/1000)
+ 		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
+	 	$.ajax({
+			url: "https://sync.paybook.com/v1/transactions?token=" + token + "&id_credential=" + credential + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
+			dataType: 'json',
+			success: function(t) {
+				this.setState({data4: t.response});
+				
+					}.bind(this)
+				});
+	 },
+	exportar: function(){
+	 	 var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+		    tab_text = tab_text + '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+
+		    tab_text = tab_text + '<x:Name>'+  this.state.rfc +'</x:Name>';
+
+		    tab_text = tab_text + '<x:WorksheetOptions><x:Panes></x:Panes></x:WorksheetOptions></x:ExcelWorksheet>';
+		    tab_text = tab_text + '</x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
+
+		    tab_text = tab_text + "<table border='1px'>";
+		    tab_text = tab_text + $('#datos').html();
+		    tab_text = tab_text + '</table></body></html>';
+
+		    var data_type = 'data:application/vnd.ms-excel';
+		    
+		    var ua = window.navigator.userAgent;
+		    var msie = ua.indexOf("MSIE ");
+		    
+		    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+		        if (window.navigator.msSaveBlob) {
+		            var blob = new Blob([tab_text], {
+		                type: "application/csv;charset=utf-8;"
+		            });
+		            navigator.msSaveBlob(blob, this.state.rfc +'.xls');
+		        }
+		    } else {
+		        $('#test').attr('href', data_type + ', ' + encodeURIComponent(tab_text));
+		        $('#test').attr('download', this.state.rfc+ '.xls');
+		    }
+	 },
+	
+ 	render: function(){
+ 		var items = this.state.data
+ 		var estatus = this.state.data3
+ 		var banca   = this.state.data4.map(function(object){
+ 			var a = "{"
+ 			var b = "}"
+ 		var fecha = object.dt_transaction 
+ 		var fechaActualizacion = object.dt_refresh 
+ 		var dateString = moment.unix(fecha).format("DD/MM/YYYY");
+ 		var actualizacion = moment.unix(fechaActualizacion).format("DD/MM/YYYY");
+ 		var monto = object.amount.toString().indexOf("-") > -1
+ 		var urlattachments = "https://sync.paybook.com/v1" + object.attachments[0].url+ "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" + object.id_user + "&token=" + items
+ 		if (object.is_disable == 1) 
+ 			{
+ 				return 	<tbody>
+                        <tr>
+                                <td>{object.description}</td>
+                                <td className="text-center">{object.amount}</td>
+                                <td className="text-center">{object.currency}</td> 
+                                <td className="text-center danger">Cancelado</td>
+                                <td className="text-center">{dateString}</td>
+                                <td>{object.extra.tax_id}</td>
+                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
+                                </tr>
+                    </tbody>
+           	}
+            else
+        	{          
+        	
+        		return 	<tbody>
+                        <tr>
+                                <td>{object.description}</td>
+                                <td className="text-center">{object.amount}</td>
+                                <td className="text-center">{object.currency}</td>
+                                <td className="text-center">Activo</td>
+                                <td className="text-center">{dateString}</td>
+                                <td>{object.extra.tax_id}</td>
+                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
+                                </tr>
+                 </tbody>   
+          	}   
+ 		});
+		if (estatus == 200){
+			return <div>
+
+					  <div className="row">   
+					 	<div className="col-md-4"> 
+					 	</div>           
+                    	<div className="col-md-4">
+                    	<label>Ingresa tu RFC</label>
+							<input type="text" onChange={this.onChangeRfc} className="form-control" value={this.state.rfc}/>
+						<label>Ingresa tu contraseña CIEC</label>
+							<input type="password" onChange={this.onChangeCiec} className="form-control" value={this.state.ciec}/>
+							<button onClick={this.search} className="btn btn-success">Conectar</button>
+						</div>
+						<div className="col-md-4"> 
+					 	</div> 
+					  </div>
+					<div className="alert alert-success fade in m-b-10">Conectado</div>
+					<a href="#" id="test" onClick={this.exportar}>Exportar a excel</a>
+			 		<table className="table table-bordered table-hover table-striped table-td-valign-middle" id="datos">
+                        <thead>
+                            <tr className="inverse">
+                                <th>Descripción</th>
+                                <th className="text-center">Monto</th>
+                                <th className="text-center">Moneda</th>
+                                <th className="text-center">Estatus</th>
+                                <th className="text-center">Fecha</th>
+                                <th className="text-center">RFC</th>
+                                <th className="text-center">Archivo XML</th>
+                            </tr>
+                            </thead>
+			 				{banca}
+			 		</table>
+			 		
+				   </div>
+		}else
+		{
+			return <div>
+					<div className="row">   
+					 	<div className="col-md-4"> 
+					 	</div>           
+                    	<div className="col-md-4">
+                    		<label>Ingresa tu RFC</label>
+							<input type="text" onChange={this.onChangeRfc} className="form-control" value={this.state.rfc}/>
+							<label>Ingresa tu contraseña CIEC</label>
+							<input type="password" onChange={this.onChangeCiec} className="form-control" value={this.state.ciec}/>
+							<button onClick={this.search} className="btn btn-success">Conectar</button>
+						</div>
+							<div className="col-md-4"> 
+					 		</div> 
+					  	</div>
+						<div className="alert alert-danger fade in m-b-10">Desconectado</div>
+				   </div>
+		}
+		
+ 	}
+ });
+
+
+
+ React.render(<Paybook />, document.getElementById('sesiones'));
+</script>
