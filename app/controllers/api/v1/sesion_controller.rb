@@ -1,9 +1,8 @@
 class Api::V1::SesionController <ApplicationController
  skip_before_filter :verify_authenticity_token
+ 
  def index
 
-
-   
  end
 
  def create
@@ -13,13 +12,19 @@ class Api::V1::SesionController <ApplicationController
             :id_user => params[:id_user], 
             :name => params[:name], 
             :user_id => params[:user_id]
-            
             })
-   # end
-          
-          redirect_to "/home"
-       
+       respond_to do |format|
+        if @crear_sesion.save
+          format.html { redirect_to "/home", notice: 'Sesione was successfully created.' }
+          format.json { render :show, status: :created, location: @crear_sesion }
+        else
+          format.html { render :new }
+          format.json { render json: @crear_sesion.errors, status: :unprocessable_entity }
+        end
+      end
+   # end  
 end
+
 
  private
   def sesion_params

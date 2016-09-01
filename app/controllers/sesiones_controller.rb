@@ -1,8 +1,10 @@
 class SesionesController < ApplicationController
   before_action :set_sesione, only: [:show, :edit, :update, :destroy]
   require 'digest/md5'
+  
   # GET /sesiones
   # GET /sesiones.json
+
   def index
     @sesiones = Sesione.all
 
@@ -39,6 +41,7 @@ class SesionesController < ApplicationController
       end
     end
   end
+
 
   # PATCH/PUT /sesiones/1
   # PATCH/PUT /sesiones/1.json

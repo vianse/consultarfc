@@ -1,52 +1,13 @@
-<div id="header" class="header navbar navbar-default navbar-fixed-top">
-      <!-- begin container-fluid -->
-      <div class="container-fluid">
-        <!-- begin mobile sidebar expand / collapse button -->
-        <div class="navbar-header">
-          <a href="index.html" class="navbar-brand">Consulta RFC</a>
-          <button type="button" class="navbar-toggle" data-click="sidebar-toggled">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-        <!-- end mobile sidebar expand / collapse button -->
-        
-        <!-- begin navbar-right -->
-        <% if user_signed_in? %>
-        <ul class="nav navbar-nav navbar-right">
-          <li>
-          </li>
-          <li class="dropdown navbar-user">
-            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-              <span class="hidden-xs"><%= current_user.email %></span> <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu pull-right">
-              <li><%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'navbar-link'  %></li>
-            </ul>
-          </li>
-          <li>
-            <a href="javascript:;" data-click="right-sidebar-toggled">
-              <i class="fa fa-align-left"></i>
-            </a>
-          </li>
-          <% else %>
-
-          <li>
-            <%= link_to "Sign up", new_user_registration_path, :class => 'navbar-link'  %> |
-              <%= link_to "Login", new_user_session_path, :class => 'navbar-link'  %>
-          </li>
-        </ul>
-        <% end %>
-        <!-- end navbar-right -->
-      </div>
-      <!-- end container-fluid -->
-</div>
-<div id="resultado"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
-<script src="https://rawgit.com/arqex/react-json/master/build/Json.js"></script>
-<script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js"></script>
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv="Expires" content="-1">
+<meta http-equiv='pragma' content='no-cache'>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js?n=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js?n=1"></script>
+<script src="https://rawgit.com/arqex/react-json/master/build/Json.js?n=1"></script>
+<script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js?n=1"></script>
+<body data-no-transition-cache>
+  <div id="resultado"></div>
+</body>
 <script type="text/jsx">
 
  var Usuarios = React.createClass({
@@ -66,7 +27,6 @@
         success: function (returnval) {
                 this.setState({data: returnval.response.id_user});
                 this.sesion(this.state.data);
-                
                 console.log("Paso 1. Obtengo el id_user:" + this.state.data)
             }.bind(this)
        });
@@ -81,17 +41,17 @@
                 name: email,
                 user_id: <%= current_user.id %>
               },
-        success: function (returnval) {
-                this.setState({data1: returnval});
-                console.log("Paso 2. Obtengo el resultado:" + this.state.data1)
+        success: function() {
+                console.log("Paso 2. Sesion creada satisfactoriamente")
+                location.reload(true);
             }.bind(this)
        });
   },
   render: function() {
       var items =this.state.data
       return <div>
-            {items}
-           </div>
+              Creando sesión espere...
+             </div>
   }
  });
 
