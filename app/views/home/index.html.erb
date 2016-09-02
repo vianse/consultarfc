@@ -23,16 +23,40 @@
 <script src="https://rawgit.com/arqex/react-json/master/build/Json.js?n=1"></script>
 <script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js?n=1"></script>
 <!-- ================== BEGIN BASE JS ================== -->
-<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732895/jquery-1.9.1.js?n=1"></script>
-<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733033/jquery-migrate-1.1.0.min.js?n=1"></script>
-<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733159/jquery-ui.min.js?n=1"></script>
-<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733251/bootstrap.min.js?n=1"></script>
+<script 
+	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732895/jquery-1.9.1.js?n=1"></script>
+<script 
+	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733033/jquery-migrate-1.1.0.min.js?n=1"></script>
+<script 
+	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733159/jquery-ui.min.js?n=1"></script>
+<script 
+	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733251/bootstrap.min.js?n=1"></script>
+<link rel="stylesheet" 
+	  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<script type="text/javascript" 
+		src="http://viralpatel.net/blogs/demo/js/create-zip-file-javascript/jszip.js"></script>
+<script type="text/javascript" 
+		src="http://stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
+		
 </head>
 <style>
 	.section-container {
 		padding-top: 3%!important;
 		padding-left: 10%!important;
 		padding-right: 10%!important;
+	}
+	.margin{
+		margin-top: 1%!important;
+	}
+	.margin-boton{
+		margin-bottom: 2%!important;
+	}
+	.margin-left{
+		margin-left: 5%!important;
+		color: white!important;
+	}
+	.margin-right{
+		margin-right: 2%!important;
 	}
 </style>
 <body data-no-transition-cache>
@@ -104,7 +128,7 @@
 <script type="text/jsx">
 	var Paybook = React.createClass({
  	getInitialState: function () {
-    	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", loading: false, errors: {}, data1: [],data:"", data4:[], rfc: "", ciec: "", token: "", id_site: "56cf5728784806f72b8b456f", estado: "" , mes: ""}
+    	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", loading: false, errors: {}, data1: [],data:"", data4:[], rfc: "", ciec: "", token: "", id_site: "56cf5728784806f72b8b456f", estado: "" , mes: "", load:"" ,excel: ""}
   	},
 
  	componentDidMount: function() {
@@ -194,9 +218,13 @@
 			success: function(t) {
 					
 					this.setState({estado: "Espere descargando información.."});
+					this.setState({load: <li className="fa fa-spinner fa-spin fa-fw fa-2x"></li>});
 					setTimeout(function() {
 					 this.setState({data4: t.response});
 					 this.setState({estado: "Listo"});
+					 this.setState({load: ""});
+					 this.setState({excel: <a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>});
+
 					}.bind(this), 25000);
 				}.bind(this)
 
@@ -232,26 +260,78 @@
 		        $('#test').attr('href', data_type + ', ' + encodeURIComponent(tab_text));
 		        $('#test').attr('download', this.state.rfc+ '.xls');
 		    }
-	 },
-	
+	 },	
+	descarga: function(){
+		var date = new Date();
+		var mesInt = parseInt(this.state.mes)
+		var primerDia = new Date(date.getFullYear(), mesInt , 1);
+		//var ultimoDia = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+		var ultimoDia = new Date(date.getFullYear(), mesInt  + 1, 0);
+		//var primerDia = new Date(this.state.fechaInicio);
+		//var ultimoDia = new Date(this.state.fechaFin + 1, 0);
+ 		var primeroUnix = Math.round(primerDia.getTime()/1000)
+ 		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
+		var url_attach = "https://sync.paybook.com/v1/attachments?fields=url&id_credential=" + this.state.data2.id_credential + "&api_key=115524a855da6cb8c36aaed6567ee65f" + "&id_user=" + this.state.id_user + "&token=" + this.state.data + "&dt_refresh_from=" + primeroUnix + "&dt_refresh_to=" + segundoUnix
+	 	$.ajax({
+			url: url_attach,
+			dataType: 'json',
+			success: function(xmls) {
+
+				var i = xmls.response.map(function(o){
+				var urlattachments = "https://sync.paybook.com/v1" + o.url + "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" +  o.id_user 
+				return (urlattachments)
+				});
+				
+				var zip = new JSZip();
+				var count = 0;
+				var zipFilename = "zipFilename.zip";
+				var urls = i
+
+				urls.forEach(function(url){
+				  var filename = "filename";
+				  // loading a file and add it in a zip file
+				  JSZipUtils.getBinaryContent(url, function (err, data) {
+				     if(err) {
+				        throw err; // or handle the error
+				     }
+				     zip.file(filename, data, {binary:true});
+				     count++;
+				     if (count == urls.length) {
+				       var zipFile = zip.generate({type: "blob"});
+				       saveAs(zipFile, zipFilename);
+				     }
+				  });
+				});
+				//console.log(i);
+
+					}.bind(this)
+				});
+		
+	},
  	render: function(){
  		var items = this.state.data
  		var estatus = this.state.data3
+ 		
  		var banca   = this.state.data4.map(function(object){
- 			var a = "{"
- 			var b = "}"
+
+ 		
+ 		var a = "{"
+ 		var b = "}"
  		var fecha = object.dt_transaction 
  		var fechaActualizacion = object.dt_refresh 
  		var dateString = moment.unix(fecha).format("DD/MM/YYYY");
  		var actualizacion = moment.unix(fechaActualizacion).format("DD/MM/YYYY");
  		var monto = object.amount.toString().indexOf("-") > -1
  		var urlattachments = "https://sync.paybook.com/v1" + object.attachments[0].url+ "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" + object.id_user + "&token=" + items
+ 	
+ 		
+
  		if (object.is_disable == 1) 
  			{
  				return 	<tbody>
                         	<tr>
                                 <td>{object.description}</td>
-                                <td className="text-center">{object.amount}</td>
+                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
                                 <td className="text-center">{object.currency}</td> 
                                 <td className="text-center danger">Cancelado</td>
                                 <td className="text-center">{dateString}</td>
@@ -266,7 +346,8 @@
         		return 	<tbody>
                         <tr>
                                 <td>{object.description}</td>
-                                <td className="text-center">{object.amount}</td>
+                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
+                       
                                 <td className="text-center">{object.currency}</td>
                                 <td className="text-center">Activo</td>
                                 <td className="text-center">{dateString}</td>
@@ -302,18 +383,37 @@
 								  <option value="11" selected>Diciembre</option>
 								</select>
 							</label>
-							<button onClick={this.search} className="btn btn-success">Conectar</button>
+							<button onClick={this.search} className="btn btn-success margin-boton">Buscar</button>
 						</div>
 						<div className="col-md-4"> 
 					 	</div> 
 					  </div>
-					<div className="alert alert-success fade in m-b-10">{this.state.estado}</div>
-					<a href="#" id="test" onClick={this.exportar}>Exportar a excel</a>
+					  <div className="row"> 
+					  	<div className="col-md-4"> 
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 		<div className="alert alert-success fade in m-b-10 margin">{this.state.estado}{this.state.load}</div>
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 	</div> 
+					  </div> 
+					   <div className="row"> 
+					  	<div className="col-md-4"> 
+					  		{this.state.excel}
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 		<button onClick={this.descarga}>Descargar archivos xml</button>
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 	</div> 
+					  </div>
+					
 			 		<table className="table table-bordered table-hover table-striped table-td-valign-middle" id="datos">
                         <thead>
                             <tr className="inverse">
                                 <th>Descripción</th>
-                                <th className="text-center">Monto</th>
+                                <th className="text-center">Importe</th>
+                                
                                 <th className="text-center">Moneda</th>
                                 <th className="text-center">Estatus</th>
                                 <th className="text-center">Fecha</th>
@@ -352,7 +452,7 @@
 								  <option value="11">Diciembre</option>
 								</select>
 							</label>
-							<button onClick={this.search} className="btn btn-success">Conectar</button>
+							<button onClick={this.search} className="btn btn-success margin-boton">Buscar</button>
 						</div>
 							<div className="col-md-4"> 
 					 		</div> 
@@ -363,4 +463,7 @@
  	}
  });
  React.render(<Paybook />, document.getElementById('sesiones'));
+
+
+
 </script>
