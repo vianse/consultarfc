@@ -211,13 +211,13 @@
 		//var ultimoDia = new Date(this.state.fechaFin + 1, 0);
  		var primeroUnix = Math.round(primerDia.getTime()/1000)
  		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
- 		$.ajaxSetup({ "async": true})
+ 		
 	 	$.ajax({
 			url: "https://sync.paybook.com/v1/transactions?token=" + this.state.data + "&id_credential=" + credential + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
 			dataType: 'json',
 
 			success: function(t) {
-					
+					if (this.isMounted()) {
 					this.setState({estado: "Espere descargando información.."});
 					this.setState({load: <li className="fa fa-spinner fa-spin fa-fw fa-2x"></li>});
 					//setTimeout(function() {
@@ -227,6 +227,7 @@
 					 this.setState({excel: <a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>});
 
 					//}.bind(this), 25000);
+	 				}
 				}.bind(this)
 
 				});
