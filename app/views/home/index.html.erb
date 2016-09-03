@@ -220,13 +220,13 @@
 					if (this.isMounted()) {
 					this.setState({estado: "Espere descargando información.."});
 					this.setState({load: <li className="fa fa-spinner fa-spin fa-fw fa-2x"></li>});
-					//setTimeout(function() {
+					setTimeout(function() {
 					 this.setState({data4: t.response});
 					 this.setState({estado: "Listo"});
 					 this.setState({load: ""});
 					 this.setState({excel: <a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>});
 
-					//}.bind(this), 25000);
+					}.bind(this), 25000);
 	 				}
 				}.bind(this)
 
