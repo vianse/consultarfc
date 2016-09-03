@@ -34,7 +34,7 @@
 <link rel="stylesheet" 
 	  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 <script type="text/javascript" 
-		src="https://viralpatel.net/blogs/demo/js/create-zip-file-javascript/jszip.js"></script>
+		src="https://stuk.github.io/jszip/dist/jszip.js"></script>
 <script type="text/javascript" 
 		src="https://stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
 		
@@ -211,21 +211,22 @@
 		//var ultimoDia = new Date(this.state.fechaFin + 1, 0);
  		var primeroUnix = Math.round(primerDia.getTime()/1000)
  		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
- 		
+ 		$.ajaxSetup({ "async": true})
 	 	$.ajax({
 			url: "https://sync.paybook.com/v1/transactions?token=" + this.state.data + "&id_credential=" + credential + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
 			dataType: 'json',
+
 			success: function(t) {
 					
 					this.setState({estado: "Espere descargando información.."});
 					this.setState({load: <li className="fa fa-spinner fa-spin fa-fw fa-2x"></li>});
-					setTimeout(function() {
+					//setTimeout(function() {
 					 this.setState({data4: t.response});
 					 this.setState({estado: "Listo"});
 					 this.setState({load: ""});
 					 this.setState({excel: <a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>});
 
-					}.bind(this), 25000);
+					//}.bind(this), 25000);
 				}.bind(this)
 
 				});
@@ -274,39 +275,25 @@
 		var url_attach = "https://sync.paybook.com/v1/attachments?fields=url&id_credential=" + this.state.data2.id_credential + "&api_key=115524a855da6cb8c36aaed6567ee65f" + "&id_user=" + this.state.id_user + "&token=" + this.state.data + "&dt_refresh_from=" + primeroUnix + "&dt_refresh_to=" + segundoUnix
 	 	$.ajax({
 			url: url_attach,
-			dataType: 'json',
+			type     : "GET",
+   			dataType : "json",
 			success: function(xmls) {
-
 				var i = xmls.response.map(function(o){
-				var urlattachments = "https://sync.paybook.com/v1" + o.url + "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" +  o.id_user 
+				var urlattachments = "https://sync.paybook.com/v1" + o.url + "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" +  o.id_user
 				return (urlattachments)
 				});
-				
-				var zip = new JSZip();
-				var count = 0;
-				var zipFilename = "zipFilename.zip";
-				var urls = i
-
-				urls.forEach(function(url){
-				  var filename = "filename";
-				  // loading a file and add it in a zip file
-				  JSZipUtils.getBinaryContent(url, function (err, data) {
-				     if(err) {
-				        throw err; // or handle the error
-				     }
-				     zip.file(filename, data, {binary:true});
-				     count++;
-				     if (count == urls.length) {
-				       var zipFile = zip.generate({type: "blob"});
-				       saveAs(zipFile, zipFilename);
-				     }
-				  });
-				});
-				//console.log(i);
-
+					this.creazip(i);
+					console.log(i);
 					}.bind(this)
 				});
 		
+	},
+	creazip: function(i){
+		var fileURLs = i;
+	
+
+
+
 	},
  	render: function(){
  		var items = this.state.data
@@ -402,7 +389,7 @@
 					  		{this.state.excel}
 					 	</div> 
 					 	<div className="col-md-4"> 
-					 		<button onClick={this.descarga}>Descargar archivos xml</button>
+					 		
 					 	</div> 
 					 	<div className="col-md-4"> 
 					 	</div> 
