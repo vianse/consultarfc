@@ -117,7 +117,6 @@
 </html>
 
 <script type="text/jsx">
-
 var actions = Reflux.createActions(
 	["consulta","credencial","estatus","listar"]
 )
@@ -254,14 +253,9 @@ var storeListado = Reflux.createStore({
 
 			success: function(t) {
 					this.listado = t.response
-					if(t.response){
+					
 						console.log(this.listado);
 						this.trigger(this.listado);
-					}else{
-						setInterval(() => {
-							actions.listar();
-						}, 5000);
-					}
 					
 				}
 				});
@@ -475,7 +469,6 @@ var Paybook = React.createClass({
 					 	</div> 
 					 	
 					  </div>
-
 			 			<PaybookListdo token={this.state.storetoken} />
 				</div>
 
