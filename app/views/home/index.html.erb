@@ -16,27 +16,19 @@
     <link href="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447735472/jquery.gritter.css" rel="stylesheet" /> 
     <script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1472524455/moment.js?n=1"></script>
 
-<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js?n=1"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js?n=1"></script>
-<script src="https://rawgit.com/arqex/react-json/master/build/Json.js?n=1"></script>
-<script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js?n=1"></script>
-<!-- ================== BEGIN BASE JS ================== -->
-<script 
-	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732895/jquery-1.9.1.js?n=1"></script>
-<script 
-	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733033/jquery-migrate-1.1.0.min.js?n=1"></script>
-<script 
-	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733159/jquery-ui.min.js?n=1"></script>
-<script 
-	   src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733251/bootstrap.min.js?n=1"></script>
-<link rel="stylesheet" 
-	  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-<script type="text/javascript" 
-		src="https://stuk.github.io/jszip/dist/jszip.js"></script>
-<script type="text/javascript" 
-		src="https://stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js?n=1"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js?n=1"></script>
+	<script src="https://rawgit.com/arqex/react-json/master/build/Json.js?n=1"></script>
+	<script src="//cdn.jsdelivr.net/refluxjs/0.2.11/reflux.min.js?n=1"></script>
+		<!-- ================== BEGIN BASE JS ================== -->
+	<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447732895/jquery-1.9.1.js?n=1"></script>
+	<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733033/jquery-migrate-1.1.0.min.js?n=1"></script>
+	<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733159/jquery-ui.min.js?n=1"></script>
+	<script src="https://res.cloudinary.com/dnubgpeun/raw/upload/v1447733251/bootstrap.min.js?n=1"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://stuk.github.io/jszip/dist/jszip.js"></script>
+	<script type="text/javascript" src="https://stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
 		
 </head>
 <style>
@@ -121,60 +113,222 @@
                   
                 </div>
 	</div>
-
 </body>
 </html>
 
 <script type="text/jsx">
-	var Paybook = React.createClass({
+
+var actions = Reflux.createActions(
+	["consulta","credencial","estatus","listar"]
+)
+var storeToken = Reflux.createStore({
+	listenables: [actions],
+	resulttoken: "",
+	api_key: "115524a855da6cb8c36aaed6567ee65f",
+	id_user: "" +  "<%= @id_user %>",
+	token: "",
+	onConsulta: function(){
+		var url = 'https://sync.paybook.com/v1/sessions?api_key=' + this.api_key
+		$.ajax({
+      			url: url ,
+      			type: 'POST',
+      			cache: false,
+      			context: this,
+				data: {
+				        api_key: this.api_key,
+				    	id_user: this.id_user
+	 				  },
+				success: function (returnval) {
+					  this.resulttoken = returnval.response.token;
+					  this.trigger(this.resulttoken);
+        			  //this.setState({token: returnval.response.token});
+        			  //this.obtenerSitio(this.state.data);
+        		}
+   		 });
+	},
+});
+var storeCredenciales = Reflux.createStore({
+	mixins: [Reflux.connect(storeToken, 'storetoken')],
+	listenables: [actions],
+	api_key: "115524a855da6cb8c36aaed6567ee65f",
+	id_user: "" +  "<%= @id_user %>",
+	token: "",
+	id_site: "56cf5728784806f72b8b456f",
+	rfc: "",
+	ciec: "",
+	id_credential: "",
+	credencial: function(rfc,ciec,token,mes){
+		var url = 'https://sync.paybook.com/v1/credentials'
+		$.ajax({
+      			url: url ,
+      			type: 'POST',
+      			cache: false,
+      			context: this,
+				data: {
+				        id_site: this.id_site, 
+				    	credentials: {"rfc": rfc, "password": ciec},
+				    	token: token
+	 				  },
+				success: function (returnval) {
+					  this.id_credential = returnval.response;
+					  //console.log(returnval.response);
+					  actions.estatus(token, this.id_credential.id_credential,mes);
+					  this.trigger(this.id_credential);
+        			  //this.setState({token: returnval.response.token});
+        			  //this.obtenerSitio(this.state.data);
+        		}
+   		 });
+	},	
+});
+var storeStatus = Reflux.createStore({
+	listenables: [actions],
+	token: "",
+	status: "Conectado",
+
+	estatus: function(token, credencial,mes){
+		$.ajax({
+			url: "https://sync.paybook.com/v1/credentials/" + credencial + "/status?token=" + token,
+			dataType: 'json',
+			cache: false,
+      		context: this,
+			success: function(estatus) {
+				      this.status = estatus.code
+					  //console.log(this.status);
+					  this.trigger(this.status);
+					  actions.listar(mes,token,credencial)
+				
+					}
+				});
+	},	
+});
+var PaybookEstado = React.createClass({
+	mixins: [Reflux.connect(storeStatus, 'storestatus')],
+	render(){
+			   if (this.state.storestatus == 200){
+			   	return <div className="alert alert-success fade in m-b-10 margin">
+						Listo..
+			   		   </div>
+			   }else{
+			   	return <div className="alert alert-success fade in m-b-10 margin">
+						Esperando a que comiences a buscar...
+					   </div>
+			   }
+			    
+		
+	}
+});
+var storeListado = Reflux.createStore({
+	listenables: [actions],
+	listado: "",
+	listar: function(mes,token,credencial){
+
+		var date = new Date();
+		var mesInt = parseInt(mes)
+		var primerDia = new Date(date.getFullYear(), mesInt , 1);
+		//var ultimoDia = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+		var ultimoDia = new Date(date.getFullYear(), mesInt  + 1, 0);
+		//var primerDia = new Date(this.state.fechaInicio);
+		//var ultimoDia = new Date(this.state.fechaFin + 1, 0);
+ 		var primeroUnix = Math.round(primerDia.getTime()/1000)
+ 		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
+ 		
+	 	$.ajax({
+			url: "https://sync.paybook.com/v1/transactions?token=" + token + "&id_credential=" + credencial + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
+			dataType: 'json',
+			cache: false,
+			context: this,
+
+			success: function(t) {
+					this.listado = t.response
+					//console.log(this.listado);
+					this.trigger(this.listado);
+				}
+				});
+
+	}	
+});
+var PaybookListdo = React.createClass({
+	mixins: [Reflux.connect(storeListado, 'storelistar')],
+	getInitialState(){
+		return {storelistar: []}
+	},
+	render(){
+		if (this.state.storelistar){
+			var items = this.props.token
+			var banca   = this.state.storelistar.map(function(object){
+			var fecha = object.dt_transaction 
+	 		var fechaActualizacion = object.dt_refresh 
+	 		var dateString = moment.unix(fecha).format("DD/MM/YYYY");
+	 		var actualizacion = moment.unix(fechaActualizacion).format("DD/MM/YYYY");
+	 		var monto = object.amount.toString().indexOf("-") > -1
+	 		var urlattachments = "https://sync.paybook.com/v1" + object.attachments[0].url+ "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" + object.id_user + "&token=" + items
+				
+			if (object.is_disable == 1) 
+ 			{
+ 				return 	<tbody>
+                        	<tr>
+                                <td>{object.description}</td>
+                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
+                                <td className="text-center">{object.currency}</td> 
+                                <td className="text-center danger">Cancelado</td>
+                                <td className="text-center">{dateString}</td>
+                                <td>{object.extra.tax_id}</td>
+                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
+                            </tr>
+                    </tbody>
+                    
+           	}
+            else
+        	{          
+        	
+        		return 	<tbody>
+	                        <tr>
+                                <td>{object.description}</td>
+                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
+                       
+                                <td className="text-center">{object.currency}</td>
+                                <td className="text-center">Activo</td>
+                                <td className="text-center">{dateString}</td>
+                                <td>{object.extra.tax_id}</td>
+                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
+                                </tr>
+                		 </tbody>   
+			 			
+          	}   
+ 		
+		});
+		return <table className="table table-bordered table-hover table-striped table-td-valign-middle" id="datos">
+                        	<thead>
+                            <tr className="inverse">
+                                <th>Descripción</th>
+                                <th className="text-center">Importe</th>
+                                <th className="text-center">Moneda</th>
+                                <th className="text-center">Estatus</th>
+                                <th className="text-center">Fecha</th>
+                                <th className="text-center">RFC</th>
+                                <th className="text-center">Archivo XML</th>
+                            </tr>
+                            </thead>
+                            {banca}
+                         </table>
+		}
+		else
+		{
+		return <p>No hay datos para mostrar </p>
+		}
+
+	}
+});
+var Paybook = React.createClass({
+	mixins: [Reflux.connect(storeToken, 'storetoken')],
+	//mixins: [Reflux.connect(storeCredenciales, 'storecredenciales')],
  	getInitialState: function () {
     	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", loading: false, errors: {}, data1: [],data:"", data4:[], rfc: "", ciec: "", token: "", id_site: "56cf5728784806f72b8b456f", estado: "" , mes: "", load:"" ,excel: ""}
   	},
 
  	componentDidMount: function() {
- 		var url = 'https://sync.paybook.com/v1/sessions?api_key=' + this.state.api_key
-		$.ajax({
-      			url: url ,
-      			type: 'POST',
-				data: {
-				        api_key: this.state.api_key,
-				    	id_user: this.state.id_user
-	 				  },
-				success: function (returnval) {
-        			  this.setState({data: returnval.response.token});
-        			  //this.obtenerSitio(this.state.data);
-        			 
-        		}.bind(this)
-   		 });
+		actions.consulta();
 	 },
-	/*obtenerSitio: function(token){
-		var url1 = "https://sync.paybook.com/v1/catalogues/sites?token=" + token + "&id_site=" + this.state.id_site
-	 	$.ajax({
-			url: url1,
-			dataType: 'json',
-			success: function(sites) {
-				this.setState({data1: sites.response});
-				this.setState({token: token});
-				alert("Sitio " + this.state.data1[0].id_site);
-					}.bind(this)
-				});
-	 },*/
-	credenciales: function(token){
-		$.ajax({
-      			url: 'https://sync.paybook.com/v1/credentials',
-      			type: 'POST',
-				data: {
-				    	id_site: this.state.id_site, 
-				    	credentials: {"rfc": this.state.rfc, "password": this.state.ciec},
-				    	token: this.state.data
-	 				  },
-				success: function (regreso) {
-        			this.setState({data2: regreso.response});
-        			this.estatus(this.state.data2.id_credential,this.state.data);
-        			
-        		}.bind(this)
-   		 });
-	},
 	onChangeRfc: function(e,f){
 		this.setState({rfc: e.target.value});
 	},
@@ -185,54 +339,8 @@
 		this.setState({mes: e.target.value});
 	},
 	search: function(){
-		this.credenciales(this.state.data);
+		actions.credencial(this.state.rfc,this.state.ciec,this.state.storetoken,this.state.mes);
 	},
-	estatus: function(credential, token){
-	 	$.ajax({
-			url: "https://sync.paybook.com/v1/credentials/" + credential + "/status?token=" + token,
-			dataType: 'json',
-			success: function(estatus) {
-				this.setState({data3: estatus.code});
-				
-				this.listado(credential,this.state.data);
-				this.setState({estado: "Conectado"});
-				
-					}.bind(this)
-				});
-	 },
-	listado: function(credential, token){
-		
-		var date = new Date();
-		var mesInt = parseInt(this.state.mes)
-		var primerDia = new Date(date.getFullYear(), mesInt , 1);
-		//var ultimoDia = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-		var ultimoDia = new Date(date.getFullYear(), mesInt  + 1, 0);
-		//var primerDia = new Date(this.state.fechaInicio);
-		//var ultimoDia = new Date(this.state.fechaFin + 1, 0);
- 		var primeroUnix = Math.round(primerDia.getTime()/1000)
- 		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
- 		
-	 	$.ajax({
-			url: "https://sync.paybook.com/v1/transactions?token=" + this.state.data + "&id_credential=" + credential + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
-			dataType: 'json',
-
-			success: function(t) {
-					if (this.isMounted()) {
-					this.setState({estado: "Espere descargando información.."});
-					this.setState({load: <li className="fa fa-spinner fa-spin fa-fw fa-2x"></li>});
-					setTimeout(function() {
-					 this.setState({data4: t.response});
-					 this.setState({estado: "Listo"});
-					 this.setState({load: ""});
-					 this.setState({excel: <a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>});
-
-					}.bind(this), 25000);
-	 				}
-				}.bind(this)
-
-				});
-
-	 },
 	exportar: function(){
 	 	 var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
 		    tab_text = tab_text + '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
@@ -287,142 +395,19 @@
 					console.log(i);
 					}.bind(this)
 				});
-		
 	},
 	creazip: function(i){
 		var fileURLs = i;
-	
-
-
-
 	},
  	render: function(){
- 		var items = this.state.data
- 		var estatus = this.state.data3
- 		
- 		var banca   = this.state.data4.map(function(object){
-
- 		
- 		var a = "{"
- 		var b = "}"
- 		var fecha = object.dt_transaction 
- 		var fechaActualizacion = object.dt_refresh 
- 		var dateString = moment.unix(fecha).format("DD/MM/YYYY");
- 		var actualizacion = moment.unix(fechaActualizacion).format("DD/MM/YYYY");
- 		var monto = object.amount.toString().indexOf("-") > -1
- 		var urlattachments = "https://sync.paybook.com/v1" + object.attachments[0].url+ "?api_key=115524a855da6cb8c36aaed6567ee65f&id_user=" + object.id_user + "&token=" + items
- 	
- 		
-
- 		if (object.is_disable == 1) 
- 			{
- 				return 	<tbody>
-                        	<tr>
-                                <td>{object.description}</td>
-                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
-                                <td className="text-center">{object.currency}</td> 
-                                <td className="text-center danger">Cancelado</td>
-                                <td className="text-center">{dateString}</td>
-                                <td>{object.extra.tax_id}</td>
-                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
-                            </tr>
-                    </tbody>
-           	}
-            else
-        	{          
-        	
-        		return 	<tbody>
-                        <tr>
-                                <td>{object.description}</td>
-                                <td className="text-center">{object.amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</td>
-                       
-                                <td className="text-center">{object.currency}</td>
-                                <td className="text-center">Activo</td>
-                                <td className="text-center">{dateString}</td>
-                                <td>{object.extra.tax_id}</td>
-                                <td><a target="_blank" href={urlattachments}>{object.attachments[0].file}</a></td>
-                                </tr>
-                 </tbody>   
-          	}   
- 		});
-		if (estatus == 200){
-			return <div>
+		return <div>
 					  <div className="row">   
 					 	<div className="col-md-4"> 
 					 	</div>           
                     	<div className="col-md-4">
                     	<label>Ingresa tu RFC</label>
 							<input type="text" onChange={this.onChangeRfc} className="form-control" value={this.state.rfc} required/>
-						<label>Ingresa tu contraseña CIEC</label>
-							<input type="password" onChange={this.onChangeCiec} className="form-control" value={this.state.ciec} required/>
-							<label for="fecha">Selecciona un mes para filtrar la información:
-								<select onChange={this.mes} className="form-control" required>
-								  <option value="0" selected>Enero</option>
-								  <option value="1">Febrero</option>
-								  <option value="2">Marzo</option>
-								  <option value="3">Abril</option>
-								  <option value="4">Mayo</option>
-								  <option value="5">Junio</option>
-								  <option value="6">Julio</option>
-								  <option value="7">Agosto</option>
-								  <option value="8">Septiembre</option>
-								  <option value="9">Octubre</option>
-								  <option value="10">Noviembre</option>
-								  <option value="11" selected>Diciembre</option>
-								</select>
-							</label>
-							<button onClick={this.search} className="btn btn-success margin-boton">Buscar</button>
-						</div>
-						<div className="col-md-4"> 
-					 	</div> 
-					  </div>
-					  <div className="row"> 
-					  	<div className="col-md-4"> 
-					 	</div> 
-					 	<div className="col-md-4"> 
-					 		<div className="alert alert-success fade in m-b-10 margin">{this.state.estado}{this.state.load}</div>
-					 	</div> 
-					 	<div className="col-md-4"> 
-					 	</div> 
-					  </div> 
-					   <div className="row"> 
-					  	<div className="col-md-4"> 
-					  		{this.state.excel}
-					 	</div> 
-					 	<div className="col-md-4"> 
-					 		
-					 	</div> 
-					 	<div className="col-md-4"> 
-					 	</div> 
-					  </div>
-					
-			 		<table className="table table-bordered table-hover table-striped table-td-valign-middle" id="datos">
-                        <thead>
-                            <tr className="inverse">
-                                <th>Descripción</th>
-                                <th className="text-center">Importe</th>
-                                
-                                <th className="text-center">Moneda</th>
-                                <th className="text-center">Estatus</th>
-                                <th className="text-center">Fecha</th>
-                                <th className="text-center">RFC</th>
-                                <th className="text-center">Archivo XML</th>
-                            </tr>
-                            </thead>
-			 				{banca}
-			 		</table>
-			 		
-				   </div>
-		}else
-		{
-			return <div>
-					<div className="row">   
-					 	<div className="col-md-4"> 
-					 	</div>           
-                    	<div className="col-md-4">
-                    		<label>Ingresa tu RFC</label>
-							<input type="text" onChange={this.onChangeRfc} className="form-control" value={this.state.rfc} required/>
-							<label>Ingresa tu clave CIEC</label>
+						<label>Ingresa tu clave "CIEC"</label>
 							<input type="password" onChange={this.onChangeCiec} className="form-control" value={this.state.ciec} required/>
 							<label for="fecha">Selecciona un mes para filtrar la información:
 								<select onChange={this.mes} className="form-control" required>
@@ -442,16 +427,34 @@
 							</label>
 							<button onClick={this.search} className="btn btn-success margin-boton">Buscar</button>
 						</div>
-							<div className="col-md-4"> 
-					 		</div> 
-					  	</div>
-						
-				   </div>
-		}
+						<div className="col-md-4"> 
+					 	</div> 
+					  </div>
+					  <div className="row"> 
+					  	<div className="col-md-4"> 
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 		<PaybookEstado />
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 	</div> 
+					  </div> 
+					   <div className="row"> 
+					  	<div className="col-md-4"> 
+					  		<a href="#" id="test" onClick={this.exportar} className="btn btn-success margin-left margin-boton"><li className="fa fa-file-excel-o fa-2x margin-right"></li>Exportar a Excel</a>
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 		
+					 	</div> 
+					 	<div className="col-md-4"> 
+					 	</div> 
+					 	
+					  </div>
+
+			 			<PaybookListdo token={this.state.storetoken} />
+				</div>
+
  	}
  });
  React.render(<Paybook />, document.getElementById('sesiones'));
-
-
-
 </script>
