@@ -158,6 +158,7 @@ var storeCredenciales = Reflux.createStore({
 	ciec: "",
 	id_credential: "",
 	credencial: function(rfc,ciec,token,mes){
+		if (token){
 		var url = 'https://sync.paybook.com/v1/credentials'
 		$.ajax({
       			url: url ,
@@ -172,12 +173,18 @@ var storeCredenciales = Reflux.createStore({
 				success: function (returnval) {
 					  this.id_credential = returnval.response;
 					  //console.log(returnval.response);
-					  actions.estatus(token, this.id_credential.id_credential,mes);
 					  this.trigger(this.id_credential);
+					  actions.estatus(token, this.id_credential.id_credential,mes);
         			  //this.setState({token: returnval.response.token});
         			  //this.obtenerSitio(this.state.data);
         		}
    		 });
+		}
+		else 
+		{
+			console.log("no hay token")
+		}
+		
 	},	
 });
 var storeStatus = Reflux.createStore({
@@ -186,6 +193,7 @@ var storeStatus = Reflux.createStore({
 	status: "Conectado",
 
 	estatus: function(token, credencial,mes){
+		if (token){
 		$.ajax({
 			url: "https://sync.paybook.com/v1/credentials/" + credencial + "/status?token=" + token,
 			dataType: 'json',
@@ -193,12 +201,18 @@ var storeStatus = Reflux.createStore({
       		context: this,
 			success: function(estatus) {
 				      this.status = estatus.code
-					  //console.log(this.status);
+					  console.log(this.status);
 					  this.trigger(this.status);
 					  actions.listar(mes,token,credencial)
 				
 					}
 				});
+		}
+		else 
+		{
+			console.log("no hay token")
+		}
+
 	},	
 });
 var PaybookEstado = React.createClass({
@@ -221,7 +235,7 @@ var storeListado = Reflux.createStore({
 	listenables: [actions],
 	listado: "",
 	listar: function(mes,token,credencial){
-
+		if (token){
 		var date = new Date();
 		var mesInt = parseInt(mes)
 		var primerDia = new Date(date.getFullYear(), mesInt , 1);
@@ -233,17 +247,28 @@ var storeListado = Reflux.createStore({
  		var segundoUnix = Math.round(ultimoDia.getTime()/1000)
  		
 	 	$.ajax({
-			url: "https://sync.paybook.com/v1/transactions?token=" + token + "&id_credential=" + credencial + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix ,
+			url: "https://sync.paybook.com/v1/transactions?token=" + token + "&id_credential=" + credencial + "&dt_transaction_from=" + primeroUnix + "&dt_transaction_to=" + segundoUnix,
 			dataType: 'json',
 			cache: false,
 			context: this,
 
 			success: function(t) {
 					this.listado = t.response
-					//console.log(this.listado);
-					this.trigger(this.listado);
+					if(t.response){
+						console.log(this.listado);
+						this.trigger(this.listado);
+					}else{
+						setInterval(() => {
+							actions.listar();
+						}, 5000);
+					}
+					
 				}
 				});
+	 }
+	 else{
+	 	console.log("No hay token")
+	 }
 
 	}	
 });
@@ -323,7 +348,7 @@ var Paybook = React.createClass({
 	mixins: [Reflux.connect(storeToken, 'storetoken')],
 	//mixins: [Reflux.connect(storeCredenciales, 'storecredenciales')],
  	getInitialState: function () {
-    	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", loading: false, errors: {}, data1: [],data:"", data4:[], rfc: "", ciec: "", token: "", id_site: "56cf5728784806f72b8b456f", estado: "" , mes: "", load:"" ,excel: ""}
+    	return {api_key: "115524a855da6cb8c36aaed6567ee65f", id_user: "" +  "<%= @id_user %>" + "", rfc: "", ciec: "", id_site: "56cf5728784806f72b8b456f", mes: ""}
   	},
 
  	componentDidMount: function() {
